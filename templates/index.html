@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+
+{% block title %}English Lernkarte{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="heading">English Lernkarten</h1>
+  <p class="description">Vocab Test 1</p>
+  <div class="card" >
+    <div class="front .bg-light">
+        <p class=".fs-2 text">{{data["front_vocab"] }}</p>
+    </div>
+    <div class="back">
+      <div>
+        <div class="title">{{data["back_vocabs"]["one"]["name"]}}</div>
+          <p class="review">"{{data["back_vocabs"]["one"]["value"]}}"</p>
+        <div class="title">{{data["back_vocabs"]["two"]["name"]}}</div>
+          <p class="review">"{{data["back_vocabs"]["two"]["value"]}}"</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container text-center add">
+<!-- <a href="url_for('add_movie')" class="button">Add Movie</a> --!>
+<button onclick="location.href='{{ url_for('previous') }}'" type="button" class="btn btn-light">Previous</button>
+<button onclick="location.href='{{ url_for('next_') }}'" type="button" class="btn btn-dark">Next</button>
+</div>
+
+{% endblock %}

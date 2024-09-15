@@ -1,7 +1,14 @@
 import pandas
+from flask import Flask, abort, render_template, redirect, url_for, flash, request
+from flask_bootstrap import Bootstrap5
+import random
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "jdfjsnfksdj"
+Bootstrap5(app)
 
 
-def create_csv():
+def create_dataframe():
     every_word = []
     with open("Data/data.txt", "r") as file:
         for line in file:
@@ -20,9 +27,105 @@ def create_csv():
     german_words = create_list(1, every_word)
     english_description = create_list(2, every_word)
 
-    print(english_words, german_words, english_description)
+    dict = {
+        "english_word": english_words,
+        "german_word": german_words,
+        "english_desription": english_description
+    }
 
-    #TODO: Create Pandas Dataframe / CSV File from the three lists
+    df = pandas.DataFrame(dict)
+    return df
 
 
-create_csv()
+class LernkartenBot():
+
+    def __init__(self):
+        self.df = create_dataframe()
+        self.order = self.create_order()
+
+        self.order_index = 0
+        self.order_index_value = self.order[self.order_index]
+
+        self.current_vocab = self.get_vocab(self.order_index_value)
+
+    def create_order(self):
+        row_amount = self.df.shape[0]
+        order = []
+        while len(order) != (row_amount):
+            rand_numb = random.randint(0, row_amount - 1)
+            if rand_numb not in order:
+                order.append(rand_numb)
+            else:
+                pass
+        print(f"Order created {order}")
+        return order
+
+    def get_vocab(self, index):
+        row = self.df.iloc[index]
+        dict_list = [{col: row[col]} for col in self.df.columns]
+        return dict_list
+
+    def convert_dictlist_to_html_format(self):
+        vocab = self.current_vocab
+        random_part = vocab[random.randint(0, 1)]
+
+        front_vocab = list(random_part.values())[0]
+        vocab.remove(random_part)
+
+        back_one_name = list(vocab[0].keys())[0]
+        back_one_value = list(vocab[0].values())[0]
+
+        back_two_name = list(vocab[1].keys())[0]
+        back_two_value = list(vocab[1].values())[0]
+
+        dict = {
+            "front_vocab": front_vocab,
+            "back_vocabs": {
+                "one": {
+                    "name": back_one_name,
+                    "value": back_one_value
+                },
+                "two": {
+                    "name": back_two_name,
+                    "value": back_two_value
+                }
+
+            }
+        }
+        return dict
+
+    def next_vocab(self):
+        self.order_index += 1
+        self.order_index_value = self.order[self.order_index]
+        self.current_vocab = bot.get_vocab(self.order_index_value)
+
+    def previous_vocab(self):
+        self.order_index -= 1
+        self.order_index_value = self.order[self.order_index]
+        self.current_vocab = bot.get_vocab(self.order_index_value)
+
+
+bot = LernkartenBot()
+print("\n")
+
+
+@app.route("/")
+def home():
+    data = bot.convert_dictlist_to_html_format()
+    return render_template("index.html", data=data)
+
+
+@app.route("/next")
+def next_():
+    bot.next_vocab()
+    return redirect(url_for("home"))
+
+
+@app.route("/previous")
+def previous():
+    bot.previous_vocab()
+    return redirect(url_for("home"))
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5003)
