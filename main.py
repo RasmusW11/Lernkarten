@@ -42,6 +42,7 @@ class LernkartenBot():
     def __init__(self):
         self.df = create_dataframe("Data/page1.txt")
         self.order = self.create_order()
+        self.language_direction = 2
 
         self.order_index = 0
         self.order_index_value = self.order[self.order_index]
@@ -67,8 +68,10 @@ class LernkartenBot():
 
     def convert_dictlist_to_html_format(self):
         vocab = self.current_vocab
-        random_part = vocab[random.randint(0, 1)]
-
+        if self.language_direction == 2:
+            random_part = vocab[random.randint(0, 1)]
+        else:
+            random_part = vocab[self.language_direction]
         front_vocab = list(random_part.values())[0]
 
         back_vocab = vocab.copy()
@@ -151,6 +154,8 @@ def previous():
 def submit():
     if request.method == 'POST':
         selected_page = request.form.get('vocab_page')
+        selected_language = request.form.get("language")
+        bot.language_direction = int(selected_language)
         bot.change_vocab(selected_page)
         return redirect(url_for("home"))
 
