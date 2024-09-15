@@ -8,9 +8,9 @@ app.config["SECRET_KEY"] = "jdfjsnfksdj"
 Bootstrap5(app)
 
 
-def create_dataframe():
+def create_dataframe(file_path):
     every_word = []
-    with open("Data/data.txt", "r") as file:
+    with open(f"{file_path}", "r") as file:
         for line in file:
             every_word.append(line.strip())
 
@@ -40,13 +40,13 @@ def create_dataframe():
 class LernkartenBot():
 
     def __init__(self):
-        self.df = create_dataframe()
+        self.df = create_dataframe("Data/page1.txt")
         self.order = self.create_order()
 
         self.order_index = 0
         self.order_index_value = self.order[self.order_index]
 
-        self.current_vocab = self.get_vocab(self.order_index_value)
+        self.current_vocab = self.get_vocab()
 
     def create_order(self):
         row_amount = self.df.shape[0]
@@ -60,8 +60,8 @@ class LernkartenBot():
         print(f"Order created {order}")
         return order
 
-    def get_vocab(self, index):
-        row = self.df.iloc[index]
+    def get_vocab(self):
+        row = self.df.iloc[self.order_index_value]
         dict_list = [{col: row[col]} for col in self.df.columns]
         return dict_list
 
@@ -70,13 +70,15 @@ class LernkartenBot():
         random_part = vocab[random.randint(0, 1)]
 
         front_vocab = list(random_part.values())[0]
-        vocab.remove(random_part)
 
-        back_one_name = list(vocab[0].keys())[0]
-        back_one_value = list(vocab[0].values())[0]
+        back_vocab = vocab.copy()
+        back_vocab.remove(random_part)
 
-        back_two_name = list(vocab[1].keys())[0]
-        back_two_value = list(vocab[1].values())[0]
+        back_one_name = list(back_vocab[0].keys())[0]
+        back_one_value = list(back_vocab[0].values())[0]
+
+        back_two_name = list(back_vocab[1].keys())[0]
+        back_two_value = list(back_vocab[1].values())[0]
 
         dict = {
             "front_vocab": front_vocab,
@@ -95,14 +97,33 @@ class LernkartenBot():
         return dict
 
     def next_vocab(self):
-        self.order_index += 1
-        self.order_index_value = self.order[self.order_index]
-        self.current_vocab = bot.get_vocab(self.order_index_value)
+        print(f"Current Index: {self.order_index}")
+        try:
+            self.order_index += 1
+            self.order_index_value = self.order[self.order_index]
+            self.current_vocab = bot.get_vocab()
+        except IndexError:
+            self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
+                                  {"Ende Vokabeln": "Ende Vokabeln"}]
+            self.order_index -= 1
 
     def previous_vocab(self):
-        self.order_index -= 1
+        print(f"Current Index: {self.order_index}")
+        try:
+            self.order_index -= 1
+            self.order_index_value = self.order[self.order_index]
+            self.current_vocab = bot.get_vocab()
+        except IndexError:
+            self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
+                                  {"Ende Vokabeln": "Ende Vokabeln"}]
+            self.order_index += 1
+
+    def change_vocab(self, pageindex):
+        self.df = create_dataframe(f"Data/page{pageindex}.txt")
+        self.order_index = 0
         self.order_index_value = self.order[self.order_index]
-        self.current_vocab = bot.get_vocab(self.order_index_value)
+        self.current_vocab = self.get_vocab()
+
 
 
 bot = LernkartenBot()
@@ -125,6 +146,13 @@ def next_():
 def previous():
     bot.previous_vocab()
     return redirect(url_for("home"))
+
+@app.route("/submit", methods=["POST"])
+def submit():
+    if request.method == 'POST':
+        selected_page = request.form.get('vocab_page')
+        bot.change_vocab(selected_page)
+        return redirect(url_for("home"))
 
 
 if __name__ == "__main__":
