@@ -12,7 +12,7 @@
 	 margin: 0;
 	 padding: 0;
 	 height: 100vh;
-	 background-color: #ecf0f9;
+	 background-color: dark-grey;
 	 background-attachment: fixed;
 }
 .large {
@@ -125,7 +125,7 @@
 	 transform: rotateY(-180deg);
 }
  .back {
-	 background: #fff;
+	 background: dark-grey;
 	 transform: rotateY(-180deg);
 	 padding: 0 2em;
 }
