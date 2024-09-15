@@ -17,7 +17,7 @@ def create_dataframe(file_path):
     def create_list(start, list):
         index = start
         new_list = []
-        loop_amount = int(len(list) / 3 - 1)
+        loop_amount = int(len(list) / 3)
         for element in range(loop_amount):
             new_list.append(list[index])
             index += 3
@@ -108,6 +108,8 @@ class LernkartenBot():
             self.current_vocab = bot.get_vocab()
         except IndexError as e:
             print(f"ERROR: {e}")
+            print(f"Order: {self.order}, Order_Point:{self.order_index_value}, Cur_Index: {self.order_index}")
+            print(self.df)
             self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
                                   {"Ende Vokabeln": "Ende Vokabeln"}]
             self.order_index -= 1
