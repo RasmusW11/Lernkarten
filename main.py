@@ -122,7 +122,11 @@ class LernkartenBot():
             self.order_index += 1
 
     def change_vocab(self, pageindex):
-        self.df = create_dataframe(f"Data/page{pageindex}.txt")
+        saved = self.df
+        try:
+            self.df = create_dataframe(f"Data/page{pageindex}.txt")
+        except Exception:
+            self.df = saved
         self.order_index = 0
         self.order_index_value = self.order[self.order_index]
         self.current_vocab = self.get_vocab()
@@ -155,7 +159,11 @@ def submit():
     if request.method == 'POST':
         selected_page = request.form.get('vocab_page')
         selected_language = request.form.get("language")
-        bot.language_direction = int(selected_language)
+        saved = bot.language_direction
+        try:
+            bot.language_direction = int(selected_language)
+        except Exception:
+            bot.language_direction = saved
         bot.change_vocab(selected_page)
         return redirect(url_for("home"))
 
