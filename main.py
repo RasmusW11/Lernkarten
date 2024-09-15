@@ -114,7 +114,6 @@ class LernkartenBot():
            if self.order_index > len(self.order):
                self.order_index -= 1
         print(f"Current Index: {self.order_index}")
-        print(len(self.order))
         # self.order_index += 1
         # if self.order_index >
 
