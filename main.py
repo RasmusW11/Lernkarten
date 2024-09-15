@@ -106,6 +106,7 @@ class LernkartenBot():
             self.order_index += 1
             self.order_index_value = self.order[self.order_index]
             self.current_vocab = bot.get_vocab()
+            print(f"Added Index: {self.order_index}")
         except IndexError:
             self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
                                   {"Ende Vokabeln": "Ende Vokabeln"}]
@@ -113,14 +114,25 @@ class LernkartenBot():
 
     def previous_vocab(self):
         print(f"Current Index: {self.order_index}")
-        try:
-            self.order_index -= 1
-            self.order_index_value = self.order[self.order_index]
-            self.current_vocab = bot.get_vocab()
-        except IndexError:
+        #try:
+        #    self.order_index -= 1
+        #    self.order_index_value = self.order[self.order_index]
+        #    self.current_vocab = bot.get_vocab()
+        #except IndexError:
+        #    self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
+        #                          {"Ende Vokabeln": "Ende Vokabeln"}]
+        #    self.order_index += 1
+
+        self.order_index -= 1
+        if self.order_index < 0:
             self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
                                   {"Ende Vokabeln": "Ende Vokabeln"}]
-            self.order_index += 1
+            if self.order_index < -1:
+                self.order_index += 1
+        else:
+            self.order_index_value = self.order[self.order_index]
+            self.current_vocab = bot.get_vocab()
+            print(f"Removed Index: {self.order_index}")
 
     def change_vocab(self, pageindex):
         saved_index = self.page_index
