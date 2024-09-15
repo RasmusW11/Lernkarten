@@ -43,6 +43,7 @@ class LernkartenBot():
         self.df = create_dataframe("Data/page1.txt")
         self.order = self.create_order()
         self.language_direction = 2
+        self.page_index = 1
 
         self.order_index = 0
         self.order_index_value = self.order[self.order_index]
@@ -122,11 +123,14 @@ class LernkartenBot():
             self.order_index += 1
 
     def change_vocab(self, pageindex):
+        saved_index = self.page_index
         saved = self.df
         try:
             self.df = create_dataframe(f"Data/page{pageindex}.txt")
+            self.page_index = int(pageindex)
         except Exception:
             self.df = saved
+            self.page_index = saved_index
         self.order_index = 0
         self.order_index_value = self.order[self.order_index]
         self.current_vocab = self.get_vocab()
@@ -140,7 +144,8 @@ print("\n")
 @app.route("/")
 def home():
     data = bot.convert_dictlist_to_html_format()
-    return render_template("index.html", data=data)
+    cur_page = f"Page {bot.page_index}"
+    return render_template("index.html", data=data, cur_page=cur_page)
 
 
 @app.route("/next")
