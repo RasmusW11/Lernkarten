@@ -163,7 +163,6 @@ def next_():
     bot.next_vocab()
     return redirect(url_for("home"))
 
-
 @app.route("/previous")
 def previous():
     bot.previous_vocab()
