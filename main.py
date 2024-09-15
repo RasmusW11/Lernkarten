@@ -2,9 +2,10 @@ import pandas
 from flask import Flask, abort, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap5
 import random
+import os
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "jdfjsnfksdj"
+app.config["SECRET_KEY"] = os.environ.get("FLASK_KEY")
 Bootstrap5(app)
 
 
