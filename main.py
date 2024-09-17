@@ -3,10 +3,40 @@ from flask import Flask, abort, render_template, redirect, url_for, flash, reque
 from flask_bootstrap import Bootstrap5
 import random
 import os
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import String, Integer, Float
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("FLASK_KEY")
 Bootstrap5(app)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///lernkarten.db"
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
+
+
+class Lernkarte(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    english: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    german: Mapped[str] = mapped_column(String(50), unique=False, nullable=False)
+    description: Mapped[str] = mapped_column(String(150), unique=False, nullable=False)
+
+
+class AddForm(FlaskForm):
+    english = StringField("English Term")
+    german = StringField("German Term")
+    description = StringField("Description")
+    SubmitField = SubmitField("Submit")
 
 
 def create_dataframe(file_path):
@@ -104,20 +134,19 @@ class LernkartenBot():
     def next_vocab(self):
         print(f"Current Index: {self.order_index}")
         try:
-           self.order_index += 1
-           self.order_index_value = self.order[self.order_index]
-           self.current_vocab = bot.get_vocab()
+            self.order_index += 1
+            self.order_index_value = self.order[self.order_index]
+            self.current_vocab = bot.get_vocab()
         except IndexError as e:
-           print(f"ERROR: {e}")
-           print(f"Order: {self.order}, Order_Point:{self.order_index_value}, Cur_Index: {self.order_index}")
-           self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
+            print(f"ERROR: {e}")
+            print(f"Order: {self.order}, Order_Point:{self.order_index_value}, Cur_Index: {self.order_index}")
+            self.current_vocab = [{"Ende Vokabeln": "Ende Vokabeln"}, {"Ende Vokabeln": "Ende Vokabeln"},
                                  {"Ende Vokabeln": "Ende Vokabeln"}]
-           if self.order_index > len(self.order):
-               self.order_index -= 1
+            if self.order_index > len(self.order):
+                self.order_index -= 1
         print(f"Current Index: {self.order_index}")
         # self.order_index += 1
         # if self.order_index >
-
 
     def previous_vocab(self):
         self.order_index -= 1
@@ -164,10 +193,12 @@ def next_():
     bot.next_vocab()
     return redirect(url_for("home"))
 
+
 @app.route("/previous")
 def previous():
     bot.previous_vocab()
     return redirect(url_for("home"))
+
 
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -181,6 +212,12 @@ def submit():
             bot.language_direction = saved
         bot.change_vocab(selected_page)
         return redirect(url_for("home"))
+
+
+@app.route("/add", methods=["POST","GET"])
+def add():
+    form = AddForm()
+    return render_template("add.html", form=form)
 
 
 if __name__ == "__main__":
