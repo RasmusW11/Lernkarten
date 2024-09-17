@@ -30,12 +30,18 @@ class Lernkarte(db.Model):
     english: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     german: Mapped[str] = mapped_column(String(50), unique=False, nullable=False)
     description: Mapped[str] = mapped_column(String(150), unique=False, nullable=False)
+    test: Mapped[str] = mapped_column(String(150), nullable=False, unique=False)
+
+
+with app.app_context():
+    db.create_all()
 
 
 class AddForm(FlaskForm):
     english = StringField("English Term")
     german = StringField("German Term")
     description = StringField("Description")
+    test = StringField("Test")
     SubmitField = SubmitField("Submit")
 
 
@@ -214,9 +220,18 @@ def submit():
         return redirect(url_for("home"))
 
 
-@app.route("/add", methods=["POST","GET"])
+@app.route("/add", methods=["POST", "GET"])
 def add():
     form = AddForm()
+    if form.validate_on_submit():
+        new_word = Lernkarte(
+            english=form.english.data,
+            german=form.german.data,
+            description=form.description.data,
+            test=form.test.data
+        )
+        db.session.add(new_word)
+        db.session.commit()
     return render_template("add.html", form=form)
 
 
